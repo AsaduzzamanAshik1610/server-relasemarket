@@ -10,27 +10,56 @@ app.use(express.json());
 
 // user:resaleDBUser
 // password: ixJoYl7ncl8f718K
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.ignp2kb.mongodb.net/?retryWrites=true&w=majority`;
+var uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@ac-5ktuwbv-shard-00-00.ignp2kb.mongodb.net:27017,ac-5ktuwbv-shard-00-01.ignp2kb.mongodb.net:27017,ac-5ktuwbv-shard-00-02.ignp2kb.mongodb.net:27017/?ssl=true&replicaSet=atlas-pj4264-shard-0&authSource=admin&retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.ignp2kb.mongodb.net/?retryWrites=true&w=majority`;
 console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run() {
     try {
         const userCollection = client.db('resalemarket').collection('users');
-        app.get('/products/upcoming', async (req, res) => {
+        const categoryCollection = client.db('resalemarket').collection('category');
+        const bookingCollection = client.db('resalemarket').collection('booking');
+        
+        app.get('/products', async (req, res) => {
           const query = {}
           const cursor = userCollection.find(query);
-          const products = await cursor.limit(4).toArray();
+          const products = await cursor.toArray();
           res.send(products);
         })
-        app.get('/products/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) }
-            const service = await userCollection.findOne(query);
+        app.get('/category', async (req, res) => {
+            // const id = req.params.id;
+            const query = {}
+            const service = await categoryCollection.find(query).toArray();
             res.send(service);
           })
-    }
+        app.get('/bookings', async (req, res) => {
+            // const id = req.params.id;
+            const query = {}
+            const service = await bookingCollection.find(query).toArray();
+            res.send(service);
+          })
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { 
+                category_id: id }
+            const service = await userCollection.find(query).toArray();
+            res.send(service);
+          })
+          app.post('/', async(req, res)=>{
+            const query = req.body;
+            const result = await bookingCollection.insertOne(query)
+            res.send(result);
+            
+          })
+          app.get('/products/:email', async(req, res)=>{
+            const query = {email:email}
+            const product = await categoryCollection.find(query).toArray();
+            res.send(product)
+          })
+
+          }
+        
     finally{
 
     }
